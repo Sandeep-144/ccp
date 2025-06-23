@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Churn Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        input {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            padding: 8px;
+        }
+        button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Customer Churn Prediction</h2>
+        <label>Subscription Length (Months):</label>
+        <input type="number" id="subscription_length">
+        
+        <label>Monthly Charge:</label>
+        <input type="number" id="monthly_charge" step="0.01">
+        
+        <label>Total Charges:</label>
+        <input type="number" id="total_charges" step="0.01">
+        
+        <button onclick="predictChurn()">Predict Churn</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function predictChurn() {
+            let data = {
+                subscription_length: document.getElementById("subscription_length").value,
+                monthly_charge: document.getElementById("monthly_charge").value,
+                total_charges: document.getElementById("total_charges").value
+            };
+
+            fetch('http://127.0.0.1:5000/predict', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("result").innerText = `Churn Prediction: ${data.churn}`;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
