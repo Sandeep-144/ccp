@@ -1,79 +1,276 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer Churn Prediction</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background-color: #f4f4f4;
-        }
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-        }
-        input {
-            display: block;
-            width: 100%;
-            margin: 10px 0;
-            padding: 8px;
-        }
-        button {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 10px;
-            cursor: pointer;
-        }
-        #result {
-            margin-top: 20px;
-            font-weight: bold;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customer Churn Predictor</title>
+
+  <!-- 🔹 Minimal Tailwind-like palette via CSS variables -->
+  <style>
+    :root {
+      --bg: #f6f8fa;
+      --fg: #1f2937;
+      --brand: #3b82f6;
+      --brand-light: #93c5fd;
+      --error: #dc2626;
+      --border: #e5e7eb;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
+        sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      display: flex;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 820px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 2.5rem 2rem;
+      box-shadow: 0 8px 16px rgba(31, 41, 55, 0.06);
+    }
+
+    h1 {
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      font-size: 1.75rem;
+      text-align: center;
+      letter-spacing: -0.02em;
+    }
+
+    form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem 1.25rem;
+    }
+
+    label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: block;
+      margin-bottom: 0.35rem;
+    }
+
+    input[type="number"],
+    input[type="text"],
+    select {
+      width: 100%;
+      padding: 0.55rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      font-size: 0.92rem;
+      background: #fff;
+      transition: border 0.15s;
+    }
+
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--brand);
+      box-shadow: 0 0 0 2px var(--brand-light);
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    button {
+      grid-column: 1 / -1;
+      margin-top: 0.5rem;
+      background: var(--brand);
+      color: #fff;
+      font-size: 1rem;
+      padding: 0.8rem 1.25rem;
+      border: none;
+      border-radius: 0.6rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: #2563eb;
+    }
+
+    .result {
+      margin-top: 1.5rem;
+      text-align: center;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    .error {
+      color: var(--error);
+    }
+  </style>
 </head>
+
 <body>
-    <div class="container">
-        <h2>Customer Churn Prediction</h2>
-        <label>Subscription Length (Months):</label>
-        <input type="number" id="subscription_length">
-        
-        <label>Monthly Charge:</label>
-        <input type="number" id="monthly_charge" step="0.01">
-        
-        <label>Total Charges:</label>
-        <input type="number" id="total_charges" step="0.01">
-        
-        <button onclick="predictChurn()">Predict Churn</button>
-        <div id="result"></div>
-    </div>
+  <div class="card">
+    <h1>Customer Churn Predictor</h1>
+    <!-- 🔸 CHANGE action URL to your backend inference route -->
+    <form id="churnForm" action="/predict" method="post">
+      <!-- Numeric Inputs -->
+      <div>
+        <label for="call_failure">Call Failure</label>
+        <input id="call_failure" name="Call  Failure" type="number" min="0" required />
+      </div>
 
-    <script>
-        function predictChurn() {
-            let data = {
-                subscription_length: document.getElementById("subscription_length").value,
-                monthly_charge: document.getElementById("monthly_charge").value,
-                total_charges: document.getElementById("total_charges").value
-            };
+      <div>
+        <label for="complains">Complains (0/1)</label>
+        <input id="complains" name="Complains" type="number" min="0" max="1" required />
+      </div>
 
-            fetch('http://127.0.0.1:5000/predict', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById("result").innerText = `Churn Prediction: ${data.churn}`;
-            })
-            .catch(error => console.error('Error:', error));
-        }
-    </script>
+      <div>
+        <label for="subscription_length">Subscription Length (months)</label>
+        <input
+          id="subscription_length"
+          name="Subscription  Length"
+          type="number"
+          min="1"
+          required />
+      </div>
+
+      <div>
+        <label for="charge_amount">Charge Amount ($)</label>
+        <input
+          id="charge_amount"
+          name="Charge  Amount"
+          type="number"
+          min="0"
+          step="0.01"
+          required />
+      </div>
+
+      <div>
+        <label for="seconds_of_use">Seconds of Use</label>
+        <input
+          id="seconds_of_use"
+          name="Seconds of Use"
+          type="number"
+          min="0"
+          required />
+      </div>
+
+      <div>
+        <label for="frequency_of_use">Frequency of Use</label>
+        <input
+          id="frequency_of_use"
+          name="Frequency of use"
+          type="number"
+          min="0"
+          required />
+      </div>
+
+      <div>
+        <label for="customer_value">Customer Value</label>
+        <input
+          id="customer_value"
+          name="Customer Value"
+          type="number"
+          min="0"
+          required />
+      </div>
+
+      <div>
+        <label for="frequency_sms">Frequency of SMS</label>
+        <input
+          id="frequency_sms"
+          name="Frequency of SMS"
+          type="number"
+          min="0"
+          required />
+      </div>
+
+      <div>
+        <label for="distinct_numbers">Distinct Called Numbers</label>
+        <input
+          id="distinct_numbers"
+          name="Distinct Called Numbers"
+          type="number"
+          min="0"
+          required />
+      </div>
+
+      <!-- Categorical Inputs -->
+      <div>
+        <label for="tariff_plan">Tariff Plan</label>
+        <select id="tariff_plan" name="Tariff Plan" required>
+          <option value="">--Choose--</option>
+          <option value="Standard">Standard</option>
+          <option value="Premium">Premium</option>
+          <option value="Basic">Basic</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="status">Status</label>
+        <select id="status" name="Status" required>
+          <option value="">--Choose--</option>
+          <option value="Active">Active</option>
+          <option value="Married">Married</option>
+          <option value="Single">Single</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="age_group">Age Group</label>
+        <select id="age_group" name="Age Group" required>
+          <option value="">--Choose--</option>
+          <option value="Teen">Teen</option>
+          <option value="Adult">Adult</option>
+          <option value="50+">50+</option>
+        </select>
+      </div>
+
+      <!-- Submit -->
+      <button type="submit">Predict Churn</button>
+    </form>
+
+    <!-- Result placeholder -->
+    <div id="result" class="result"></div>
+  </div>
+
+  <!-- Optional: small JS to show response without reloading -->
+  <script>
+    const form = document.getElementById("churnForm");
+    const resultDiv = document.getElementById("result");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      try {
+        const data = new FormData(form);
+        const plain = Object.fromEntries(data.entries());
+
+        const res = await fetch(form.action, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(plain),
+        });
+
+        if (!res.ok) throw new Error("Prediction failed");
+
+        const { probability, prediction } = await res.json();
+        resultDiv.textContent = `Prediction: ${prediction} (${(probability * 100).toFixed(2)}%)`;
+        resultDiv.classList.remove("error");
+      } catch (err) {
+        resultDiv.textContent = err.message;
+        resultDiv.classList.add("error");
+      }
+    });
+  </script>
 </body>
 </html>
